@@ -1,0 +1,88 @@
+Sub CreateCharts()
+    ' Define variables
+    Dim wb As Workbook
+    Dim ws1 As Worksheet
+    Dim ws2 As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim chartRange As Range
+    Dim chartObj As ChartObject
+    Dim axisRange As Range
+    Dim startYear As Integer
+    Dim endYear As Integer
+    
+    ' Set references to the workbook and worksheets
+    Set wb = ThisWorkbook
+    Set ws1 = wb.Sheets("Sheet1")
+    
+    
+    ' Delete the Charts1 worksheet if it already exists
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    wb.Sheets("Charts1").Delete
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+    
+    
+    ' Create a new worksheet for the charts
+    Set ws2 = wb.Sheets.Add(After:=ws1)
+    ws2.Name = "Charts1"
+    
+    ' Prompt the user for the start year and end year of the x-axis
+    startYear = InputBox("Enter the start year for the x-axis:")
+    endYear = InputBox("Enter the end year for the x-axis:")
+    
+    ' Define the axis chart range based on user input
+    Set axisRange = ws1.Range("J1:BF1").Find(startYear, LookIn:=xlValues, LookAt:=xlWhole).Resize(, endYear - startYear + 1)
+    
+    ' Iterate over each row of data and create a chart
+    For i = 3 To ws1.Cells(ws1.Rows.Count, 2).End(xlUp).Row
+    
+    ' Define the chart range for the current row
+        Set chartRange = ws1.Range("J1:BF1").Offset(i - 1, 0).Resize(, endYear - startYear + 1)
+        
+    ' Create a new chart object ( i++ change range)
+        Set chartObj = ws2.ChartObjects.Add(Left:=10 + (i - 2) * 400, Top:=10, Width:=400, Height:=250)
+        
+    ' Add a chart to the chart object
+        With chartObj.Chart
+            .ChartType = xlLine
+            .SetSourceData Source:=chartRange
+            .SeriesCollection(1).Name = ws1.Cells(i, 9).Value
+            .SeriesCollection(1).XValues = axisRange
+            .HasTitle = True
+            .ChartTitle.Text = ws1.Cells(i, 4).Value ' Set the chart title to the country name from column D
+    ' Set labels for the Y and X axes
+            .Axes(xlValue).HasTitle = True
+            .Axes(xlValue).AxisTitle.Text = "Values"
+            .Axes(xlCategory).HasTitle = True
+            .Axes(xlCategory).AxisTitle.Text = "Years"
+        End With
+    Next i
+    
+'    ' Add the axis chart to the top of the Charts worksheet
+
+
+    ' Define the chart range for the current row
+        Set chartRange = ws1.Range("J2:BF2").Resize(, endYear - startYear + 1)
+        
+    ' Create a new chart object ( i++ change range)
+        Set chartObj = ws2.ChartObjects.Add(Left:=10, Top:=10, Width:=400, Height:=250)
+        
+    ' Add a chart to the chart object
+        With chartObj.Chart
+            .ChartType = xlLine
+            .SetSourceData Source:=chartRange
+            .SeriesCollection(1).Name = ws1.Cells(2, 9).Value
+            .SeriesCollection(1).XValues = axisRange
+            .HasTitle = True
+            .ChartTitle.Text = ws1.Cells(2, 4).Value ' Set the chart title to the country name from column D
+    ' Set labels for the Y and X axes
+            .Axes(xlValue).HasTitle = True
+            .Axes(xlValue).AxisTitle.Text = "Values"
+            .Axes(xlCategory).HasTitle = True
+            .Axes(xlCategory).AxisTitle.Text = "Years"
+        End With
+
+
+End Sub
